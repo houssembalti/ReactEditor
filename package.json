@@ -8,17 +8,9 @@
     "build": "webpack --config webpack.config.js --mode production",
     "start": "webpack serve --open"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/RinconCamilo/Setting-React-Webpack-TypeScript.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/RinconCamilo/Setting-React-Webpack-TypeScript/issues"
-  },
-  "homepage": "https://github.com/RinconCamilo/Setting-React-Webpack-TypeScript#readme",
   "devDependencies": {
     "@babel/core": "^7.19.0",
     "@babel/preset-env": "^7.19.0",
