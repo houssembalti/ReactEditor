@@ -573,17 +573,17 @@ const App = (props: { variable: string }) => {
           },
 
           ///
-          paste_block_drop: true,
+          //paste_block_drop: true,
 
           automatic_uploads: true,
           image_advtab: true,
           image_title: true,
           // branding:false,
           popup_css: "./aze.css",
-          images_upload_base_path: "/images",
-          paste_preprocess: (plugin, args: any) => {
-            args.content = "";
-          },
+          //images_upload_base_path: "/images",
+          // paste_preprocess: (plugin, args: any) => {
+          //   args.content = "";
+          // },
           //font size values
           font_size_formats:
             "8pt 9pt 10pt 11pt 12pt 14pt 18pt 24pt 30pt 36pt 48pt 60pt 72pt 96pt",
