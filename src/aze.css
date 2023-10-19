@@ -1,0 +1,9 @@
+/* Add spacing between custom items in the custom dialog */
+.tox-dialog__body .tox-button[name="custom-button-1"] {
+  margin-right: 10px; /* Adjust the right margin for spacing */
+}
+
+.tox-dialog {
+  margin-top: 300px;
+  background-color: #007aff;
+}
