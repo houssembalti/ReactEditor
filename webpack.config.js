@@ -3,6 +3,10 @@ const path = require("path");
 module.exports = {
   entry: "./src/index.tsx",
   mode: "development",
+  devServer: {
+    port: 8090,
+    webSocketServer: false,
+  },
   output: {
     filename: "bundle.[fullhash].js",
     path: path.resolve(__dirname, "dist"),

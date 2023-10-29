@@ -20,6 +20,19 @@ const App = (props: { variable: string }) => {
   let selected_node: string;
   let bua: any;
   const editorRef: any = useRef(null);
+  useEffect(() => {
+    const handleButtonClick = (event: any) => {
+      event.preventDefault(); // Prevent the default action (e.g., form submission or URL navigation)
+      // You can add custom handling here, such as displaying a message
+    };
+
+    const button: HTMLElement | null = document.getElementById("btn");
+    button?.addEventListener("click", handleButtonClick);
+
+    return () => {
+      button?.removeEventListener("click", handleButtonClick);
+    };
+  }, []);
   return (
     <div>
       <Editor
@@ -32,11 +45,15 @@ const App = (props: { variable: string }) => {
           plugins:
             "preview  importcss searchreplace autolink autosave save directionality  visualblocks visualchars  image link    table charmap  pagebreak nonbreaking    advlist lists wordcount     charmap quickbars emoticons ",
           setup: function (editor) {
+            editor.on("init", function () {});
+
             //select
             editor.on("click", function (e: any) {
               if (editor.selection.getNode().nodeName == "BUTTON") {
-                console.log(editor.selection.getNode().id);
-                console.log(editor.selection.getNode());
+                // e.preventDefault();
+
+                console.log("f", editor.selection.getNode());
+
                 selected_node = editor.selection.getNode().id;
                 editor.windowManager.open({
                   title: "Add button",
@@ -60,20 +77,117 @@ const App = (props: { variable: string }) => {
                         //placeholder: "please type url source here",
                         enabled: true,
                       },
+                      {
+                        type: "grid",
+                        columns: 2,
+                        items: [
+                          {
+                            type: "listbox", // change component type to listbox
+                            name: "fontSize",
+                            label: "Font Size",
+
+                            items: [
+                              { value: "12px", text: "12px" },
+                              { value: "14px", text: "14px" },
+                              { value: "16px", text: "16px" },
+                              { value: "18px", text: "18px" },
+                              { value: "20px", text: "20px" },
+                              { value: "22px", text: "22px" },
+                              { value: "24px", text: "24px" },
+                              { value: "26px", text: "26px" },
+                              { value: "28px", text: "28px" },
+                              { value: "30px", text: "30px" },
+                              // Add more font sizes as per your requirement
+                            ],
+                          },
+                          {
+                            type: "listbox",
+                            name: "fontFamily",
+                            label: "Font Family",
+
+                            items: [
+                              {
+                                text: "Andale Mono",
+                                value: "Andale Mono, monospace",
+                              },
+                              {
+                                text: "Arial",
+                                value: "Arial, Helvetica, sans-serif",
+                              },
+                              {
+                                text: "Arial Black",
+                                value: "Arial Black, sans-serif",
+                              },
+                              {
+                                text: "Book Antiqua",
+                                value: "Book Antiqua, Palatino, serif",
+                              },
+                              {
+                                text: "Comic Sans MS",
+                                value: "Comic Sans MS, sans-serif",
+                              },
+                              {
+                                text: "Courier New",
+                                value: "Courier New, Courier, monospace",
+                              },
+                              { text: "Georgia", value: "Georgia, serif" },
+                              {
+                                text: "Helvetica",
+                                value: "Helvetica, sans-serif",
+                              },
+                              {
+                                text: "Impact",
+                                value: "Impact, Charcoal, sans-serif",
+                              },
+                              {
+                                text: "Tahoma",
+                                value: "Tahoma, Geneva, sans-serif",
+                              },
+                              {
+                                text: "Terminal",
+                                value: "Terminal, monospace",
+                              },
+                              {
+                                text: "Times New Roman",
+                                value: "Times New Roman, Times, serif",
+                              },
+                              {
+                                text: "Trebuchet MS",
+                                value: "Trebuchet MS, sans-serif",
+                              },
+                              { text: "Verdana", value: "Verdana, sans-serif" },
+                              {
+                                text: "Webdings",
+                                value: "Webdings, sans-serif",
+                              },
+                              {
+                                text: "Wingdings",
+                                value: "Wingdings, sans-serif",
+                              },
+                              // Add more font families as per your requirement
+                            ],
+                          },
+                        ],
+                      },
 
                       {
                         type: "grid", // component type
-                        columns: 2, // number of columns
+                        columns: 3, // number of columns
                         items: [
                           {
                             type: "input", // component type
-                            name: "marging",
-                            label: "marging",
+                            name: "margin",
+                            label: "Margin",
                           },
                           {
                             type: "input", // component type
                             name: "padding",
-                            label: "padding",
+                            label: "Padding",
+                          },
+                          {
+                            type: "input", // component type
+                            name: "borderRadius",
+                            label: "Border Radius",
                           },
                         ], // array of panel components
                       },
@@ -125,11 +239,13 @@ const App = (props: { variable: string }) => {
                       editor.selection.getNode().style.backgroundColor == ""
                         ? "#ffffff"
                         : editor.selection.getNode().style.backgroundColor,
-                    marging: editor.selection.getNode().style.margin
-                      ? editor.selection
-                          .getNode()
-                          .style.margin.replaceAll("px", "")
-                      : "0 0",
+                    margin:
+                      editor.selection.getNode().style.margin &&
+                      editor.selection.getNode().style.margin !== "0px"
+                        ? editor.selection
+                            .getNode()
+                            .style.margin.replaceAll("px", "")
+                        : "0 0",
                     padding: editor.selection.getNode().style.padding
                       ? editor.selection
                           .getNode()
@@ -138,7 +254,18 @@ const App = (props: { variable: string }) => {
                     textcolor: editor.selection.getNode().style.color
                       ? editor.selection.getNode().style.color
                       : "#000000",
+                    url_input:
+                      editor.selection.getNode().getAttribute("data-url") || "",
                     // padding:document.getElementById("houssem")!.style.padding,
+                    fontSize: editor.selection.getNode().style.fontSize
+                      ? editor.selection.getNode().style.fontSize
+                      : "12px",
+                    fontFamily: editor.selection.getNode().style.fontFamily
+                      ? editor.selection.getNode().style.fontFamily
+                      : "Arial, Helvetica, sans-serif",
+                    borderRadius: editor.selection.getNode().style.borderRadius
+                      ? editor.selection.getNode().style.borderRadius.replace("px", "")
+                      : "0",
                   },
                   onChange(api: any, details: any) {
                     //  let button: HTMLButtonElement = document.getElementById("view")!;
@@ -155,50 +282,20 @@ const App = (props: { variable: string }) => {
                     // api.setData({
                     //   iframe: button.outerHTML,
                     // });
-
-                    let margin_numbers = api.getData().marging.split(/\s+/); // Split the string by one or more spaces
-                    let padding_numbers = api.getData().padding.split(/\s+/); // Split the string by one or more spaces
-                    // Add "px" after each number
-                    const margin_px = margin_numbers
-                      .map((number: number) => number + "px")
-                      .join(" ");
-                    const padding_px = padding_numbers
-                      .map((number: number) => number + "px")
-                      .join(" ");
-                    console.log("f", margin_px, padding_px);
-                    var x = editor.selection.dom.create(
-                      "button",
-                      {
-                        id: selected_node,
-                        style:
-                          "background-color: " +
-                          api.getData().colorinput +
-                          "; margin: " +
-                          margin_px +
-                          "; padding: " +
-                          padding_px +
-                          ";color :" +
-                          api.getData().textcolor,
-                        class: "mceNonEditable",
-                        onclick:
-                          "window.open('" +
-                          api.getData().url_input +
-                          "', '_blank');",
-                      },
-
-                      api.getData().button_text
-                    );
                   },
                   onAction(api: any, details: any) {
-                    let margin_numbers = api.getData().marging.split(/\s+/); // Split the string by one or more spaces
+                    let margin_numbers = api.getData().margin.split(/\s+/); // Split the string by one or more spaces
                     let padding_numbers = api.getData().padding.split(/\s+/); // Split the string by one or more spaces
+                    // Split the string by one or more spaces
                     // Add "px" after each number
+
                     const margin_px = margin_numbers
                       .map((number: number) => number + "px")
                       .join(" ");
                     const padding_px = padding_numbers
                       .map((number: number) => number + "px")
                       .join(" ");
+
                     console.log("f", margin_px, padding_px);
                     var x = editor.selection.dom.create(
                       "button",
@@ -212,16 +309,21 @@ const App = (props: { variable: string }) => {
                           "; padding: " +
                           padding_px +
                           ";color :" +
-                          api.getData().textcolor,
+                          api.getData().textcolor +
+                          "; font-family: " +
+                          api.getData().fontFamily +
+                          "; font-size: " +
+                          api.getData().fontSize +
+                          "; border-radius: " +
+                          api.getData().borderRadius +
+                          "px",
                         class: "mceNonEditable",
-                        onclick:
-                          "window.open('" +
-                          api.getData().url_input +
-                          "', '_blank');",
+                        "data-url": api.getData().url_input,
                       },
 
                       api.getData().button_text
                     );
+                    bua = x.outerHTML.toString();
                     api.setData({
                       iframe:
                         "<!DOCTYPE html>" +
@@ -234,8 +336,9 @@ const App = (props: { variable: string }) => {
                     });
                   },
                   onSubmit(api: any) {
-                    let margin_numbers = api.getData().marging.split(/\s+/); // Split the string by one or more spaces
+                    let margin_numbers = api.getData().margin.split(/\s+/); // Split the string by one or more spaces
                     let padding_numbers = api.getData().padding.split(/\s+/); // Split the string by one or more spaces
+
                     const margin_px = margin_numbers
                       .map((number: number) => number + "px")
                       .join(" ");
@@ -254,16 +357,21 @@ const App = (props: { variable: string }) => {
                           "; padding: " +
                           padding_px +
                           ";color :" +
-                          api.getData().textcolor,
+                          api.getData().textcolor +
+                          "; font-family: " +
+                          api.getData().fontFamily +
+                          "; font-size: " +
+                          api.getData().fontSize +
+                          "; border-radius: " +
+                          api.getData().borderRadius +
+                          "px",
                         class: "mceNonEditable",
-                        onclick:
-                          "window.open('" +
-                          api.getData().url_input +
-                          "', '_blank');",
+                        "data-url": api.getData().url_input,
                       },
 
                       api.getData().button_text
                     );
+
                     // var a = editor.selection.dom.createHTML("button", {
                     //   id: selected_node,
                     //   style:
@@ -284,21 +392,11 @@ const App = (props: { variable: string }) => {
                     // );
 
                     console.log(x);
-                    //console.log(a);
-                    editor.selection.setContent(x.outerHTML, {
-                      format: "html",
-                    });
-                    api.setData({
-                      iframe:
-                        "<!DOCTYPE html>" +
-                        "<html>" +
-                        "<head></head>" +
-                        '<body style="display:flex;justify-content:center;">' +
-                        x.outerHTML +
-                        "</body>" +
-                        "</html>",
-                    });
-                    //api.close();
+
+                    // Insert the button and the space
+                    editor.selection.setNode(x);
+                    editor.insertContent("\u00A0\u00A0\u00A0\u00A0");
+                    api.close();
 
                     //  var el=editor.dom.create("button", {}, api.getData().button_text);
                     //   ediotr
@@ -486,11 +584,6 @@ const App = (props: { variable: string }) => {
                         //placeholder: "please type url source here",
                         enabled: true,
                       },
-
-                     
-
-                     
-                     
                     ],
                   },
                   buttons: [
@@ -512,7 +605,7 @@ const App = (props: { variable: string }) => {
           },
 
           toolbar:
-            "  undo redo  |blocks fontsize   fontfamily| bold italic underline strikethrough | alignleft aligncenter alignright alignjustify   | outdent indent |  numlist bullist | forecolor backcolor removeformat  |  emoticons | fullscreen  preview   |    image     | ltr rtl |  mybutton add addshopbutton addcolor dropzone",
+            "  undo redo  |blocks fontsize   fontfamily| bold italic underline strikethrough | alignleft aligncenter alignright alignjustify   | outdent indent |  numlist bullist | forecolor backcolor removeformat  |  emoticons | fullscreen  preview   |    image     | ltr rtl |  mybutton add addshopbutton addcolor dropzone LineHeight",
           toolbar_sticky: true,
           menubar: false,
           language: "fr_FR",
@@ -607,6 +700,9 @@ const App = (props: { variable: string }) => {
           //any html added with this class it cannot be changed in the editor
           noneditable_noneditable_class: "mceNonEditable",
           toolbar_mode: "sliding",
+          extended_valid_elements: "button[onclick|class|style|id]",
+          //valid_elements: "a[href]",
+          link_assume_external_targets: true,
 
           content_style:
             "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
@@ -627,6 +723,7 @@ const App = (props: { variable: string }) => {
       >
         Save
       </button>
+      <div dangerouslySetInnerHTML={{ __html: bua }}></div>
 
       <ToastContainer
         position="top-left"
