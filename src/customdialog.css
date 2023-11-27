@@ -83,3 +83,7 @@
   height: 90px !important;
   min-height: 90px !important;
 }
+
+.tox-notifications-container {
+  z-index: 9999 !important;
+}

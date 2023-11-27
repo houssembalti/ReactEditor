@@ -3,12 +3,20 @@ import { Editor } from "@tinymce/tinymce-react";
 import { editorobject } from "./Editor_output";
 import "./editor.css";
 import { addbuttondialog, dialogconfig, dialogconfig_2 } from "./Customdialog";
-import { addbuttons, addit, edittedbutton } from "./addButton";
+import {
+  addbuttons,
+  addbuttonwithtext,
+  addit,
+  edittedbutton,
+} from "./addButton";
+import ReactDOMServer from "react-dom/server";
+
 import { clearformaticon } from "./utils";
 //declare let window: editorobject;
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./customdialog.css";
+import Custom from "./Custom";
 
 const App = (props: { variable: string }) => {
   const [cont, setcont] = useState(props.variable);
@@ -46,14 +54,73 @@ const App = (props: { variable: string }) => {
             "preview  importcss searchreplace autolink autosave save directionality  visualblocks visualchars  image link    table charmap  pagebreak nonbreaking    advlist lists wordcount     charmap quickbars emoticons ",
           setup: function (editor) {
             editor.on("init", function () {});
+            //   editor.on('NodeChange', function (e) {
+            //     if (e.element.nodeName === 'IMG' ) {
 
-            //select
+            //         var parentDiv = editor.dom.getParent(e.element, 'div');
+            //         if (parentDiv) {
+            //             editor.dom.remove(parentDiv);
+            //         }
+            //     }
+            // });
+
+            editor.on("change", function () {
+              if (
+                editor.dom.get("image_change")?.offsetWidth != 0 &&
+                editor.dom.get("image_change")?.offsetHeight != 0
+              ) {
+                console.log("sayra");
+
+                if (editor.dom.get("text_change_top_left")?.style.top) {
+                  editor.dom.get("text_change_top_left")!.style.top =
+                    editor.dom.get("image_change")!.offsetHeight / 2 + "px";
+                }
+
+                //editor.dom.get("text_change_top_left")?.style.top = h;
+                editor.dom.get("text_change_top_left")!.style.left =
+                  editor.dom.get("image_change")!.offsetLeft + "px";
+
+                const image = editor.dom.get("image_change") as HTMLElement;
+
+                // Calculate the right offset
+                const textRight =
+                //@ts-ignore
+                  image.offsetParent!.offsetWidth -
+                  (editor.dom.get("image_change")!.offsetLeft +
+                    editor.dom.get("image_change")!.offsetWidth);
+                console.log(textRight);
+                // Adjust the 'left' property of the text element
+                editor.dom.get("text_change_top_left")!.style.right =
+                  textRight + "px";
+              }
+            });
+            editor.on("dblclick", function (e) {
+              if (editor.selection.getNode().nodeName == "IMG") {
+                var s: any = ReactDOMServer.renderToString(<Custom />);
+                editor.windowManager.open({
+                  title: "Upload Image",
+                
+            
+                  body: {
+                    type: "panel",
+                    items: [
+                      {
+                        type: "htmlpanel", // component type
+                        html: s, // HTML string of your React component
+                      },
+                    ],
+                  },
+
+                  onAction: function (action, data) {
+                    editor.windowManager.close();
+                  },
+                });
+              }
+            });
             editor.on("click", function (e: any) {
               if (editor.selection.getNode().nodeName == "BUTTON") {
                 // e.preventDefault();
-
                 console.log("f", editor.selection.getNode());
-
                 selected_node = editor.selection.getNode().id;
                 editor.windowManager.open({
                   title: "Add button",
@@ -246,11 +313,14 @@ const App = (props: { variable: string }) => {
                             .getNode()
                             .style.margin.replaceAll("px", "")
                         : "0 0",
-                    padding: editor.selection.getNode().style.padding
-                      ? editor.selection
-                          .getNode()
-                          .style.padding.replaceAll("px", "")
-                      : "0 0",
+                    padding:
+                      editor.selection.getNode().style.padding &&
+                      editor.selection.getNode().style.padding !== "0px"
+                        ? editor.selection
+                            .getNode()
+                            .style.padding.replaceAll("px", "")
+                        : "0 0",
+
                     textcolor: editor.selection.getNode().style.color
                       ? editor.selection.getNode().style.color
                       : "#000000",
@@ -264,7 +334,9 @@ const App = (props: { variable: string }) => {
                       ? editor.selection.getNode().style.fontFamily
                       : "Arial, Helvetica, sans-serif",
                     borderRadius: editor.selection.getNode().style.borderRadius
-                      ? editor.selection.getNode().style.borderRadius.replace("px", "")
+                      ? editor.selection
+                          .getNode()
+                          .style.borderRadius.replace("px", "")
                       : "0",
                   },
                   onChange(api: any, details: any) {
@@ -371,51 +443,9 @@ const App = (props: { variable: string }) => {
 
                       api.getData().button_text
                     );
-
-                    // var a = editor.selection.dom.createHTML("button", {
-                    //   id: selected_node,
-                    //   style:
-                    //     "background-color: " +
-                    //     api.getData().colorinput +
-                    //     "; margin: " +
-                    //     margin_px +
-                    //     "; padding: " +
-                    //     padding_px +
-                    //     ";color :" +
-                    //     api.getData().textcolor,
-                    //   class: "mceNonEditable",
-                    //   onclick:"window.open('" + api.getData().url_input + "', '_blank');"
-                    // },
-                    // api.getData().button_text);
-                    // console.log(
-                    //   editor.selection.dom.addStyle("margin:50px 50px")
-                    // );
-
-                    console.log(x);
-
-                    // Insert the button and the space
+                    api.close();
                     editor.selection.setNode(x);
                     editor.insertContent("\u00A0\u00A0\u00A0\u00A0");
-                    api.close();
-
-                    //  var el=editor.dom.create("button", {}, api.getData().button_text);
-                    //   ediotr
-
-                    // console.log(editor.selection.getNode());
-                    // editor.selection.setContent("<button>hello</button>", {
-                    //   format: "html",
-                    // });
-                    // x.attr('id', 'houssem');
-                    // console.log(x);
-                    // const button: HTMLButtonElement =
-                    //   document.createElement("button");
-                    // button.innerText = api.getData().button_text;
-                    // button.style.backgroundColor = api.getData().colorinput;
-                    // console.log(button);
-                    // api.setData({
-                    //   iframe: button.outerHTML,
-                    // });
-                    //api.close();
                   },
                 });
               }
@@ -493,66 +523,44 @@ const App = (props: { variable: string }) => {
                     da = "";
                   },
                   onSubmit: (dialogApi: any) => {
-                    console.log(dialogApi.getData());
-                    console.log(dialogApi.getData().url_input);
+                    var contentInserted = false;
                     if (da != "" && dialogApi.getData().url_input != "") {
-                      toast.error("You can't use two inputs at once", {
-                        position: "top-left",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-
-                        theme: "light",
+                      editor.notificationManager.open({
+                        text: "You can't use two inputs at once",
+                        type: "info",
+                        timeout: 2000,
                       });
                     } else if (
                       dialogApi.getData().url_input == "" &&
                       da == ""
                     ) {
-                      toast.error("none of those fields are filled", {
-                        position: "top-left",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-
-                        theme: "light",
+                      editor.notificationManager.open({
+                        text: "Fields are empty",
+                        type: "error",
+                        timeout: 2000,
                       });
                     } else if (dialogApi.getData().url_input != "") {
+                      contentInserted = true;
+                      console.log(contentInserted);
+                      setTimeout(() => {
+                        dialogApi.close();
+                      }, 100);
                       editor.insertContent(
                         addit(dialogApi.getData().url_input)
                       );
-                      dialogApi.close();
                     } else if (da != "") {
-                      editor.insertContent(addit(da));
+                      setTimeout(() => {
+                        dialogApi.close();
+                      }, 100);
+                      editor.insertContent(addit(da), () => {
+                        console.log("this is a test");
+                      });
                       dialogApi.close();
                     } else {
-                      toast.error("Fields are empty", {
-                        position: "top-left",
-                        autoClose: 2000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-
-                        theme: "light",
-                      });
                     }
-
-                    //editor.insertContent('<img src="' + da + '" alt="aze" />');
-
-                    //dialogApi.close();
-                    // editor.insertContent(
-                    //   addit(dialogApi.getData().url_input)
-                    // );
-                    // dialogApi.close()
+                    console.log("lekhra", contentInserted);
                   },
                   onChange(api: any, details: any) {
-                    //  editor.insertContent(api.getData().url_input_drop[0].name);
-                    // editor.insertContent(
-                    //   addit(api.getData().url_input_drop[0])
                     console.log("changed");
                     //);
                   },
@@ -584,6 +592,125 @@ const App = (props: { variable: string }) => {
                         //placeholder: "please type url source here",
                         enabled: true,
                       },
+                      {
+                        type: "selectbox",
+                        name: "textAlign",
+                        label: "Text Alignment",
+                        items: [
+                          { value: "left", text: "Left" },
+                          { value: "center", text: "Center" },
+                          { value: "right", text: "Right" },
+                        ],
+                        enabled: true,
+                      },
+                      {
+                        type: "grid",
+                        columns: 2,
+                        items: [
+                          {
+                            type: "listbox", // change component type to listbox
+                            name: "fontSize",
+                            label: "Font Size",
+
+                            items: [
+                              { value: "12px", text: "12px" },
+                              { value: "14px", text: "14px" },
+                              { value: "16px", text: "16px" },
+                              { value: "18px", text: "18px" },
+                              { value: "20px", text: "20px" },
+                              { value: "22px", text: "22px" },
+                              { value: "24px", text: "24px" },
+                              { value: "26px", text: "26px" },
+                              { value: "28px", text: "28px" },
+                              { value: "30px", text: "30px" },
+                              // Add more font sizes as per your requirement
+                            ],
+                          },
+                          {
+                            type: "listbox",
+                            name: "fontFamily",
+                            label: "Font Family",
+
+                            items: [
+                              {
+                                text: "Andale Mono",
+                                value: "Andale Mono, monospace",
+                              },
+                              {
+                                text: "Arial",
+                                value: "Arial, Helvetica, sans-serif",
+                              },
+                              {
+                                text: "Arial Black",
+                                value: "Arial Black, sans-serif",
+                              },
+                              {
+                                text: "Book Antiqua",
+                                value: "Book Antiqua, Palatino, serif",
+                              },
+                              {
+                                text: "Comic Sans MS",
+                                value: "Comic Sans MS, sans-serif",
+                              },
+                              {
+                                text: "Courier New",
+                                value: "Courier New, Courier, monospace",
+                              },
+                              { text: "Georgia", value: "Georgia, serif" },
+                              {
+                                text: "Helvetica",
+                                value: "Helvetica, sans-serif",
+                              },
+                              {
+                                text: "Impact",
+                                value: "Impact, Charcoal, sans-serif",
+                              },
+                              {
+                                text: "Tahoma",
+                                value: "Tahoma, Geneva, sans-serif",
+                              },
+                              {
+                                text: "Terminal",
+                                value: "Terminal, monospace",
+                              },
+                              {
+                                text: "Times New Roman",
+                                value: "Times New Roman, Times, serif",
+                              },
+                              {
+                                text: "Trebuchet MS",
+                                value: "Trebuchet MS, sans-serif",
+                              },
+                              { text: "Verdana", value: "Verdana, sans-serif" },
+                              {
+                                text: "Webdings",
+                                value: "Webdings, sans-serif",
+                              },
+                              {
+                                text: "Wingdings",
+                                value: "Wingdings, sans-serif",
+                              },
+                              // Add more font families as per your requirement
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        type: "grid", // component type
+                        columns: 2, // number of columns
+                        items: [
+                          {
+                            type: "colorinput", // component type
+                            name: "colorinput", // identifier
+                            label: "Background Color", // text for the label
+                          },
+                          {
+                            type: "colorinput", // component type
+                            name: "textcolor", // identifier
+                            label: "Text Color", // text for the label
+                          },
+                        ], // array of panel components
+                      },
                     ],
                   },
                   buttons: [
@@ -597,7 +724,40 @@ const App = (props: { variable: string }) => {
                     },
                   ],
                   onChange(api: any, details: any) {
-                    console.log(api.getData());
+                    //console.log(api.getData());
+                  },
+                  onSubmit: (dialogApi: any) => {
+                    console.log(dialogApi.getData());
+                    console.log(dialogApi.getData().url_input);
+                    console.log(dialogApi.getData().textAlign);
+                    if (da != "" && dialogApi.getData().Text != "") {
+                      editor.insertContent(
+                        addbuttonwithtext(
+                          da,
+                          dialogApi.getData().Text,
+                          dialogApi.getData().fontFamily,
+                          dialogApi.getData().fontSize,
+                          dialogApi.getData().textcolor,
+                          dialogApi.getData().colorinput,
+                          dialogApi.getData().textAlign
+                        )
+                      );
+                      dialogApi.close();
+                    } else {
+                      editor.notificationManager.open({
+                        text: "Text or image are empty",
+                        type: "info",
+                        timeout: 2000,
+                      });
+                    }
+
+                    //editor.insertContent('<img src="' + da + '" alt="aze" />');
+
+                    //dialogApi.close();
+                    // editor.insertContent(
+                    //   addit(dialogApi.getData().url_input)
+                    // );
+                    // dialogApi.close()
                   },
                 });
               },
@@ -700,7 +860,7 @@ const App = (props: { variable: string }) => {
           //any html added with this class it cannot be changed in the editor
           noneditable_noneditable_class: "mceNonEditable",
           toolbar_mode: "sliding",
-          extended_valid_elements: "button[onclick|class|style|id]",
+          extended_valid_elements: "button[class|style|id]",
           //valid_elements: "a[href]",
           link_assume_external_targets: true,
 
@@ -723,7 +883,13 @@ const App = (props: { variable: string }) => {
       >
         Save
       </button>
-      <div dangerouslySetInnerHTML={{ __html: bua }}></div>
+      <button
+        onClick={() => {
+          editorRef.current.destroy();
+        }}
+      >
+        aezaze
+      </button>
 
       <ToastContainer
         position="top-left"
